@@ -1,0 +1,590 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Khuôn thổi can 2L</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Bố cục: khung 3D bên trái, bảng điều khiển 3 tab bên phải; màn hình nhỏ thì xếp dọc. Phong cách bản vẽ kỹ thuật, xanh thép + cam hổ phách. */
+:root{
+  --bg:#eef1f4; --panel:#ffffff; --ink:#18212b; --muted:#5b6876; --line:#d2d9e0; --canvas:#dde4ea;
+  --accent:#b85a14; --accent-ink:#ffffff; --chip:#e6ebf0;
+  --ok:#1b7a4b; --ok-bg:#dff1e7; --warn:#8f5a00; --warn-bg:#fbeccb; --bad:#a82f27; --bad-bg:#f8dcd9;
+  --font:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#10161d; --panel:#18212b; --ink:#e6ebf0; --muted:#9aa8b6; --line:#2b3745; --canvas:#0c1218;
+    --accent:#f08a3c; --accent-ink:#1a1006; --chip:#223040;
+    --ok:#6fd49f; --ok-bg:#12372a; --warn:#f0c15f; --warn-bg:#3d2f0c; --bad:#ff8f86; --bad-bg:#43201d;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#10161d; --panel:#18212b; --ink:#e6ebf0; --muted:#9aa8b6; --line:#2b3745; --canvas:#0c1218;
+  --accent:#f08a3c; --accent-ink:#1a1006; --chip:#223040;
+  --ok:#6fd49f; --ok-bg:#12372a; --warn:#f0c15f; --warn-bg:#3d2f0c; --bad:#ff8f86; --bad-bg:#43201d;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:14px;line-height:1.5;
+  padding-block:16px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1{font-size:22px;font-weight:600;margin:0;letter-spacing:-.01em}
+h2{font-size:13px;font-weight:600;margin:0 0 8px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.sub{margin:2px 0 14px;color:var(--muted);font-family:var(--mono);font-size:12px}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 390px;gap:16px;align-items:start}
+@media (max-width:900px){.grid{grid-template-columns:minmax(0,1fr)}}
+.stage{min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+#view{height:min(70vh,640px);min-height:320px;background:var(--canvas);position:relative}
+#view canvas{display:block;width:100%;height:100%}
+.nogl{padding:24px;color:var(--muted)}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 12px;border-top:1px solid var(--line)}
+.seg{display:flex;gap:4px;flex-wrap:wrap}
+button{font:inherit;color:var(--ink);background:var(--chip);border:1px solid var(--line);border-radius:4px;padding:5px 10px;cursor:pointer}
+button:hover{border-color:var(--accent)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:500}
+#phase{font-size:13px;color:var(--muted);flex:1 1 200px;min-width:0}
+.side{min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:6px}
+.tabs{display:flex;border-bottom:1px solid var(--line)}
+.tabs button{flex:1;border:0;border-radius:0;background:transparent;padding:10px 6px;color:var(--muted);border-bottom:2px solid transparent}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent);font-weight:600}
+.pane{padding:14px;display:grid;gap:16px}
+.pane[hidden]{display:none!important}
+.row{display:grid;gap:4px}
+.row label,.lbl{font-size:13px;color:var(--muted)}
+.row .line{display:flex;gap:10px;align-items:center}
+input[type=range]{flex:1;min-width:0;accent-color:var(--accent)}
+output{font-family:var(--mono);font-size:12px;min-width:44px;text-align:right}
+input[type=number],select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:5px 8px;width:100%}
+.parts{display:grid;gap:6px}
+.parts label{display:flex;gap:8px;align-items:center;cursor:pointer}
+.sw{width:12px;height:12px;border-radius:2px;flex:none;border:1px solid rgba(0,0,0,.25)}
+.note{font-size:12px;color:var(--muted)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td{padding:6px 0;border-bottom:1px solid var(--line);vertical-align:top}
+td:last-child{text-align:right;font-family:var(--mono);white-space:nowrap}
+tr.key td{font-weight:600}
+.badge{display:inline-block;padding:2px 8px;border-radius:3px;font-size:12px;font-weight:600}
+.b-ok{background:var(--ok-bg);color:var(--ok)} .b-warn{background:var(--warn-bg);color:var(--warn)} .b-bad{background:var(--bad-bg);color:var(--bad)}
+.verdict{padding:10px 12px;border-radius:4px;font-size:13px}
+.find{display:grid;gap:4px;padding:10px 0;border-bottom:1px solid var(--line)}
+.find:last-child{border-bottom:0}
+.find b{font-weight:600}
+.find p{margin:0;color:var(--muted);font-size:13px}
+.find .t{display:flex;gap:8px;align-items:baseline;justify-content:space-between}
+</style>
+
+<header>
+  <h1>Khuôn thổi can 2L</h1>
+  <p class="sub">SXP07F04-00 · HDPE · 1 lòng khuôn · co ngót 2,5% · đơn vị mm</p>
+</header>
+
+<main class="grid">
+  <section class="stage">
+    <div id="view" role="img" aria-label="Mô hình 3D khuôn thổi can 2L"></div>
+    <div class="bar">
+      <div class="seg" id="views">
+        <button data-v="iso">Chéo</button><button data-v="front">Mặt trước</button><button data-v="side">Mặt bên</button><button data-v="top">Từ trên</button>
+      </div>
+      <button class="primary" id="play">Chạy chu kỳ thổi</button>
+      <span id="phase">Kéo chuột để xoay, cuộn để phóng to.</span>
+    </div>
+  </section>
+
+  <aside class="side">
+    <div class="tabs" role="tablist">
+      <button role="tab" aria-selected="true" data-tab="m">Mô hình</button>
+      <button role="tab" aria-selected="false" data-tab="v">Thể tích</button>
+      <button role="tab" aria-selected="false" data-tab="k">Kiểm tra</button>
+    </div>
+
+    <div class="pane" id="pane-m">
+      <div class="row">
+        <div class="lbl">Trạng thái khuôn</div>
+        <div class="seg"><button data-s="closed">Đóng</button><button data-s="open">Mở</button><button data-s="explode">Tách chi tiết</button></div>
+      </div>
+      <div class="row"><label for="open">Mở khuôn</label><div class="line"><input type="range" id="open" min="0" max="100" value="0"><output id="o-open">0%</output></div></div>
+      <div class="row"><label for="explode">Tách chi tiết</label><div class="line"><input type="range" id="explode" min="0" max="100" value="0"><output id="o-explode">0%</output></div></div>
+      <div class="row">
+        <label for="sec">Mặt cắt xem bên trong</label>
+        <select id="sec"><option value="none">Không cắt</option><option value="x">Cắt dọc (mặt phẳng đứng)</option><option value="y">Cắt ngang</option></select>
+        <div class="line"><input type="range" id="secpos" min="-95" max="95" value="0" disabled><output id="o-secpos">0</output></div>
+      </div>
+      <div class="row">
+        <label for="pard">Đường kính phôi ống (mm)</label>
+        <div class="line"><input type="range" id="pard" min="30" max="100" value="52"><output id="o-pard">52</output></div>
+        <p class="note" id="par-note"></p>
+      </div>
+      <div class="parts" id="parts"></div>
+      <label style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="checkbox" id="cold"> Hiện sản phẩm nguội (đã co ngót) trong lòng khuôn</label>
+      <p class="note">Mạch nước dựng theo hình bạn bổ sung (ngoằn ngoèo 6 làn, nằm ở mặt sau mỗi tấm). Bật Cắt dọc hoặc Tách chi tiết để thấy. Độ sâu rãnh 12 mm là giả định vì hình không ghi. Khối ghép đáy (màu cam) chứa hốc đáy sản phẩm sâu khoảng 19,5 mm. Độ sâu hốc, bo góc đáy, quai và vai chai dựng gần đúng theo kích thước bản vẽ. 10 ốc tấm lưng và 2 ốc khối ghép đặt theo bản vẽ 06/06 và 05/06.</p>
+    </div>
+
+    <div class="pane" id="pane-v" hidden>
+      <div class="row"><label for="vcad">Thể tích CAD trong khung đỏ (mL, chai nguội)</label><input type="number" id="vcad" value="2008.6" min="500" step="0.1"></div>
+      <div class="row"><label for="net">Dung tích net cần đạt (mL)</label><input type="number" id="net" value="2000" min="500" step="50"></div>
+      <div class="row"><label for="shr">Co ngót</label><div class="line"><input type="range" id="shr" min="1" max="4" step="0.1" value="2.5"><output id="o-shr">2,5%</output></div></div>
+      <div class="row"><label for="mass">Khối lượng chai (g)</label><input type="number" id="mass" value="44" min="1" step="1"></div>
+      <div class="row"><label for="share">Phần nhựa nằm trong khung đỏ (%, giả định)</label><input type="number" id="share" value="80" min="30" max="100" step="5"></div>
+      <div class="row"><label for="dens">Tỷ trọng HDPE (g/cm³)</label><input type="number" id="dens" value="0.95" min="0.9" max="0.97" step="0.005"></div>
+      <table id="vtab"></table>
+      <div class="verdict" id="verdict"></div>
+      <p class="note">Ø117,36 là kích thước chai nguội (xác nhận), nên thể tích CAD đã là thể tích sau co ngót. Khung đỏ là phần từ đáy tới chân cổ chai trên bản vẽ 02/06. Thể tích CAD là thể tích khối ngoài, chưa trừ thành nhựa. Phần nhựa trong khung là giả định, vì khối lượng 44 g còn gồm cổ và quai. Thân chai Ø115,83 với 3 đai gân Ø117,36.</p>
+    </div>
+
+    <div class="pane" id="pane-k" hidden>
+      <div id="finds"></div>
+    </div>
+  </aside>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(function(){
+'use strict';
+var T=window.THREE;
+var $=function(id){return document.getElementById(id)};
+
+/* ---------- Kích thước từ bản vẽ (mm) ---------- */
+var H=273.76, A=57.915, SH0=153.34, SH1=219.78;   // A: bán kính thân Ø115,83; 3 đai gân cao thêm 0,765 (Ø117,36)
+var RIBS=[[21.6,25.2],[86.3,94.3],[152.1,153.34]];
+function rib(y){for(var i=0;i<RIBS.length;i++){if(y>=RIBS[i][0]&&y<RIBS[i][1])return 0.765;}return 0;}
+var HD=19.5, RF=19.5;     // HD: độ sâu hốc đáy trong khối ghép (ước từ hình), RF: bo góc đáy (ước từ hình)
+var YB=45.64-HD;          // đáy chai nằm cách đầu dưới khuôn 26,14 mm
+var HC=320-YB;            // đỉnh khuôn trong hệ toạ độ chai
+var PL_L=274.36, PL_W=190, PL_T=90, BACK_T=20, INS_H=45.64;
+function rOut(y){
+  if(y<=0) return A-RF;
+  if(y<RF) return (A-RF)+Math.sqrt(Math.max(RF*RF-(RF-y)*(RF-y),0));
+  if(y<SH0) return A+rib(y);
+  if(y<SH1){var t=(y-SH0)/(SH1-SH0);return 17+(A-17)*Math.sqrt(Math.max(1-t*t,0));}
+  if(y<232) return 17;
+  if(y<247.8) return 16;
+  if(y<256) return 19;
+  if(y<=H) return 13.4;
+  return 4;               // rãnh Ø8 từ miệng chai ra mép tấm
+}
+function yShoulder(R){var q=(R-17)/(A-17);return SH0+Math.sqrt(Math.max(1-q*q,0))*(SH1-SH0);}
+/* Quai tròn đọc từ hình chiếu: thanh rộng 8,20 dày 7,48; mép ngoài cách trục 50,6; góc ngoài R15,4, góc trong R7,2 */
+var HX0=42.4, HX1=50.6, HY0=241.1, HY1=249.3, HRO=15.4, HRI=7.2, HZ=7.48;
+var HCX=HX1-HRO, HCY=HY1-HRO;
+var YO=yShoulder(HX1), YI=yShoulder(HX0);
+var YS=(function(){
+  var s={},y;
+  function add(v){s[v.toFixed(3)]=v;}
+  for(y=0;y<=HC+1e-9;y+=2.5) add(y);
+  for(y=0;y<=RF+1e-9;y+=0.25) add(y);
+  for(y=SH0;y<=SH1;y+=1.5) add(y);
+  [HD,SH0,SH1,YO,YI,232,247.8,256,H,HC].forEach(add);
+  [232,247.8,256].forEach(function(v){add(v-0.01);});
+  RIBS.forEach(function(r){add(r[0]-0.01);add(r[0]);add(r[1]-0.01);add(r[1]);});
+  add(H+0.01);
+  return Object.keys(s).map(function(k){return s[k];}).sort(function(a,b){return a-b;});
+})();
+var YSH=YS.filter(function(y){return y<=H+1e-9;});
+
+/* Quai: nằm trong mặt phân khuôn, mỗi nửa khuôn có rãnh sâu HZ/2 */
+function arcPts(cx,cy,r,a0,a1,n){var o=[],k;for(k=0;k<=n;k++){var t=a0+(a1-a0)*k/n;o.push([cx+r*Math.cos(t),cy+r*Math.sin(t)]);}return o;}
+var H_OUT=[[HX1,YO]].concat(arcPts(HCX,HCY,HRO,0,Math.PI/2,14),[[19,HY1]]);
+var H_IN=[[16,HY0]].concat(arcPts(HCX,HCY,HRI,Math.PI/2,0,10),[[HX0,YI]]);
+var SHLD=[];
+YS.forEach(function(y){ if(y>YO+1e-6 && y<YI-1e-6) SHLD.push([rOut(y),y]); });
+SHLD.reverse();
+var RING=H_OUT.concat([[19,247.8],[16,247.8]],H_IN,SHLD);
+var ISLAND=H_IN.slice();
+YS.forEach(function(y){ if(y>YI+1e-6 && y<HY0-1e-6) ISLAND.push([rOut(y),y]); });
+
+/* ---------- Thể tích ---------- */
+var V_OUT=(function(){
+  var v=0,i;
+  for(i=0;i<YSH.length-1;i++){
+    var r0=rOut(YSH[i]),r1=rOut(YSH[i+1]);
+    v+=Math.PI*(r0*r0+r1*r1)/2*(YSH[i+1]-YSH[i]);
+  }
+  return v/1000; // cm3 = mL
+})();
+
+/* ---------- Scene ---------- */
+var wrap=$('view');
+var renderer;
+try{ renderer=new T.WebGLRenderer({antialias:true}); }
+catch(e){ wrap.innerHTML='<div class="nogl">Trình duyệt này không bật được WebGL nên không hiển thị được mô hình 3D. Hai tab Thể tích và Kiểm tra vẫn dùng được.</div>'; renderer=null; }
+
+var S={open:0,explode:0,sec:'none',secPos:0,cold:false,pard:52,vis:{cai:true,duc:true,back:true,ins:true,pins:true,bolts:true,ch:true,prod:true}};
+var cycle={on:false,t:0};
+var scene,camera,controls,clip,mold={};
+
+if(renderer){
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+wrap.appendChild(renderer.domElement);
+scene=new T.Scene();
+camera=new T.PerspectiveCamera(35,1,5,6000);
+controls=new T.OrbitControls(camera,renderer.domElement);
+controls.enableDamping=true; controls.dampingFactor=0.08; controls.target.set(0,165,0);
+clip=new T.Plane(new T.Vector3(-1,0,0),0);
+
+scene.add(new T.HemisphereLight(0xffffff,0x445566,0.95));
+var d1=new T.DirectionalLight(0xffffff,0.8); d1.position.set(300,520,420); scene.add(d1);
+var d2=new T.DirectionalLight(0xffffff,0.35); d2.position.set(-320,120,-300); scene.add(d2);
+
+function mat(c,o){o=o||{};return new T.MeshStandardMaterial({color:c,roughness:o.r==null?0.55:o.r,metalness:o.m==null?0.25:o.m,side:T.DoubleSide,transparent:!!o.tr,opacity:o.op==null?1:o.op});}
+var C={cai:0x4f78a3,duc:0x4d8a79,caiCav:0x2f506f,ducCav:0x2f5f50,back:0x7d8a98,ins:0xc9912e,pin:0xd7dde3,bush:0xb5833a,bolt:0x2b2f35};
+
+function P2(a){return a.map(function(p){return new T.Vector2(p[0],p[1]);});}
+function circ(x,y,r){var c=new T.Path();c.absarc(x,y,r,0,Math.PI*2,true);return c;}
+
+var PINS_W=[[-81,64.6],[81,64.6],[-81,301.05],[81,301.05]];      // toạ độ thế giới
+/* 10 ốc tấm lưng đọc lại từ bản vẽ 06/06: y tính từ đầu khuôn phía khối ghép đáy */
+var BOLTS_W=[];
+[31.2,126.1,249.5].forEach(function(y){BOLTS_W.push([-80.7,y]);BOLTS_W.push([80.7,y]);});
+[62.4,301].forEach(function(y){BOLTS_W.push([-45.6,y]);BOLTS_W.push([45.6,y]);});
+var IBX=[-65.6,65.6];   // 2 ốc M10 của khối ghép đáy (bản vẽ 05/06)
+/* Mạch nước ngoằn ngoèo đọc từ hình bổ sung (toạ độ thế giới, mm) */
+var PK={xL:-69,xR:69,yT:285.4,yB:85.2,xA:43.6,xB:-44.3,dep:12,
+  lt:[[250.2,260.1],[180.4,190.3],[110.6,120.4]],
+  rt:[[215.3,225.2],[145.5,155.4]]};
+function fillet(pts,R){
+  var out=[],n=pts.length,i,k;
+  for(i=0;i<n;i++){
+    var p=pts[i],a=pts[(i+n-1)%n],b=pts[(i+1)%n];
+    var ux=a[0]-p[0],uy=a[1]-p[1],lu=Math.hypot(ux,uy);ux/=lu;uy/=lu;
+    var vx=b[0]-p[0],vy=b[1]-p[1],lv=Math.hypot(vx,vy);vx/=lv;vy/=lv;
+    var r=Math.min(R,0.49*lu,0.49*lv);
+    var cx=p[0]+(ux+vx)*r, cy=p[1]+(uy+vy)*r;
+    var a0=Math.atan2(p[1]+uy*r-cy,p[0]+ux*r-cx), a1=Math.atan2(p[1]+vy*r-cy,p[0]+vx*r-cx);
+    var d=a1-a0; while(d>Math.PI)d-=2*Math.PI; while(d<-Math.PI)d+=2*Math.PI;
+    for(k=0;k<=6;k++){var t=a0+d*k/6;out.push([cx+r*Math.cos(t),cy+r*Math.sin(t)]);}
+  }
+  return out;
+}
+var WATER=fillet([[PK.xL,PK.yT],[PK.xR,PK.yT],
+  [PK.xR,PK.rt[0][1]],[PK.xB,PK.rt[0][1]],[PK.xB,PK.rt[0][0]],[PK.xR,PK.rt[0][0]],
+  [PK.xR,PK.rt[1][1]],[PK.xB,PK.rt[1][1]],[PK.xB,PK.rt[1][0]],[PK.xR,PK.rt[1][0]],
+  [PK.xR,PK.yB],[PK.xL,PK.yB],
+  [PK.xL,PK.lt[2][0]],[PK.xA,PK.lt[2][0]],[PK.xA,PK.lt[2][1]],[PK.xL,PK.lt[2][1]],
+  [PK.xL,PK.lt[1][0]],[PK.xA,PK.lt[1][0]],[PK.xA,PK.lt[1][1]],[PK.xL,PK.lt[1][1]],
+  [PK.xL,PK.lt[0][0]],[PK.xA,PK.lt[0][0]],[PK.xA,PK.lt[0][1]],[PK.xL,PK.lt[0][1]]],8);
+function rrect(x0,x1,y0,y1,r){
+  var pts=[],cs=[[x1-r,y1-r,0],[x0+r,y1-r,Math.PI/2],[x0+r,y0+r,Math.PI],[x1-r,y0+r,1.5*Math.PI]],i,k;
+  for(i=0;i<4;i++)for(k=0;k<=8;k++){var t=cs[i][2]+Math.PI/2*k/8;pts.push([cs[i][0]+r*Math.cos(t),cs[i][1]+r*Math.sin(t)]);}
+  return pts;
+}
+
+function facePiece(sg,isCai){
+  var y0=HD, pts=[[sg*95,y0],[sg*95,HC]], i, hdone=false;
+  var inr=YS.filter(function(y){return y>=y0-1e-9&&y<=HC+1e-9;}).reverse();
+  inr.forEach(function(y){
+    if(sg>0&&y<HY1&&y>YO){
+      if(!hdone){hdone=true;for(i=H_OUT.length-1;i>=0;i--)pts.push(H_OUT[i]);}
+      return;
+    }
+    pts.push([sg*rOut(y),y]);
+  });
+  var sh=new T.Shape(P2(pts));
+  PINS_W.filter(function(p){return p[0]*sg>0;}).forEach(function(p){ sh.holes.push(circ(p[0],p[1]-YB,isCai?9:6)); });
+  return sh;
+}
+/* Mặt đầu tấm hoặc mặt trên khối ghép: có khoảng hở nửa tròn của thân chai */
+function capShape(holeR){
+  var pts=[[-95,0],[-A,0]],k;
+  for(k=1;k<=48;k++){var t=Math.PI*(1-k/48);pts.push([A*Math.cos(t),A*Math.sin(t)]);}
+  pts.push([95,0],[95,PL_T],[-95,PL_T]);
+  var sh=new T.Shape(P2(pts));
+  IBX.forEach(function(x){sh.holes.push(circ(x,PL_T/2,holeR));});
+  return sh;
+}
+
+function build(isCai){
+  var s=isCai?1:-1, col=isCai?C.cai:C.duc, cav=isCai?C.caiCav:C.ducCav;
+  var h={}; h.g=new T.Group(); h.g.scale.z=s;
+
+  // Thân tấm (hộp, mặt phân khuôn để trống)
+  h.body=new T.Group(); h.g.add(h.body);
+  var invis=new T.MeshBasicMaterial({visible:false});
+  var mc=mat(col,{r:0.6,m:0.3});
+  var mats=[mc,mc,mc,mc,mc,mc]; mats[5]=invis; mats[4]=invis; mats[3]=invis;
+  var box=new T.Mesh(new T.BoxGeometry(PL_W,PL_L,PL_T),mats);
+  box.position.set(0,45.64+PL_L/2,PL_T/2); h.body.add(box);
+
+  var bs=new T.Group(); bs.position.y=YB; h.body.add(bs);
+  var faceR=new T.Mesh(new T.ShapeGeometry(facePiece(1,isCai)),mc); faceR.position.z=0.01; bs.add(faceR);
+  var faceL=new T.Mesh(new T.ShapeGeometry(facePiece(-1,isCai)),mc); faceL.position.z=0.01; bs.add(faceL);
+  var pcap=new T.Mesh(new T.ShapeGeometry(capShape(4.2)),mc); pcap.rotation.x=Math.PI/2; pcap.position.y=INS_H+0.02; h.body.add(pcap);
+  var isl=new T.Mesh(new T.ShapeGeometry(new T.Shape(P2(ISLAND))),mc); isl.position.z=0.02; bs.add(isl);
+  var cavMat=mat(cav,{r:0.35,m:0.55});
+  var cavity=new T.Mesh(new T.LatheGeometry(YS.filter(function(y){return y>=HD-1e-9;}).map(function(y){return new T.Vector2(rOut(y),y);}),72,-Math.PI/2,Math.PI),cavMat); bs.add(cavity);
+  var pocket=new T.Mesh(new T.ExtrudeGeometry(new T.Shape(P2(RING)),{depth:HZ/2,bevelEnabled:false}),cavMat); bs.add(pocket);
+
+  // Tấm lưng + ốc
+  h.back=new T.Group(); h.g.add(h.back);
+  var bsh=new T.Shape(P2([[-95,0],[95,0],[95,320],[-95,320]]));
+  BOLTS_W.forEach(function(p){bsh.holes.push(circ(p[0],p[1],8.5));});
+  var l1=new T.Mesh(new T.ExtrudeGeometry(bsh,{depth:10.5,bevelEnabled:false}),mat(C.back,{r:0.6,m:0.3}));
+  l1.position.z=BACK_T+PL_T-10.5; h.back.add(l1);
+  var bsh2=new T.Shape(P2([[-95,0],[95,0],[95,320],[-95,320]]));
+  BOLTS_W.forEach(function(p){bsh2.holes.push(circ(p[0],p[1],5.3));});
+  var l2=new T.Mesh(new T.ExtrudeGeometry(bsh2,{depth:BACK_T-10.5,bevelEnabled:false}),mat(C.back,{r:0.6,m:0.3}));
+  l2.position.z=PL_T; h.back.add(l2);
+  h.bolts=new T.Group(); h.back.add(h.bolts);
+  var bm=mat(C.bolt,{r:0.4,m:0.6});
+  BOLTS_W.forEach(function(p){
+    var head=new T.Mesh(new T.CylinderGeometry(8,8,10,20),bm); head.rotation.x=Math.PI/2; head.position.set(p[0],p[1],PL_T+BACK_T-0.5-5); h.bolts.add(head);
+    var sh=new T.Mesh(new T.CylinderGeometry(5,5,40,16),bm); sh.rotation.x=Math.PI/2; sh.position.set(p[0],p[1],PL_T+BACK_T-10.5-20); h.bolts.add(sh);
+  });
+
+  // Khối ghép đáy
+  h.ins=new T.Group(); h.g.add(h.ins);
+  var im=mat(C.ins,{r:0.5,m:0.35});
+  var ib=new T.Mesh(new T.BoxGeometry(PL_W,INS_H,PL_T),[im,im,invis,invis,im,invis]); ib.position.set(0,INS_H/2,PL_T/2); h.ins.add(ib);
+  // Mặt phân khuôn của khối ghép: có hốc đáy sản phẩm sâu HD
+  var low=YS.filter(function(y){return y<=HD+1e-9;}), ip=[[-95,0],[95,0],[95,INS_H]], q;
+  for(q=low.length-1;q>=0;q--) ip.push([rOut(low[q]),YB+low[q]]);
+  for(q=0;q<low.length;q++) ip.push([-rOut(low[q]),YB+low[q]]);
+  ip.push([-95,INS_H]);
+  var iface=new T.Mesh(new T.ShapeGeometry(new T.Shape(P2(ip))),im); iface.position.z=0.01; h.ins.add(iface);
+  var icav=new T.Mesh(new T.LatheGeometry([new T.Vector2(0,0)].concat(low.map(function(y){return new T.Vector2(rOut(y),y);})),72,-Math.PI/2,Math.PI),cavMat); icav.position.y=YB; h.ins.add(icav);
+  var icap=new T.Mesh(new T.ShapeGeometry(capShape(5.3)),im); icap.rotation.x=Math.PI/2; icap.position.y=INS_H-0.02; h.ins.add(icap);
+  // Hai ốc M10 từ mặt dưới (đầu chìm Ø17 sâu 10,5) bắt lên đầu tấm
+  var isb=new T.Shape(P2([[-95,0],[95,0],[95,PL_T],[-95,PL_T]]));
+  IBX.forEach(function(x){isb.holes.push(circ(x,PL_T/2,8.5));});
+  var ibf=new T.Mesh(new T.ShapeGeometry(isb),im); ibf.rotation.x=Math.PI/2; ibf.position.y=0.01; h.ins.add(ibf);
+  h.insb=new T.Group(); h.ins.add(h.insb);
+  IBX.forEach(function(x){
+    var hd=new T.Mesh(new T.CylinderGeometry(8,8,10,20),bm); hd.position.set(x,5.5,PL_T/2); h.insb.add(hd);
+    var sk=new T.Mesh(new T.CylinderGeometry(5,5,70,16),bm); sk.position.set(x,45.5,PL_T/2); h.insb.add(sk);
+  });
+
+  // Mặt sau tấm có rãnh nước (hình bổ sung), gioăng O-ring và nước
+  var bk=new T.Shape(P2([[-95,45.64],[95,45.64],[95,320],[-95,320]]));
+  bk.holes.push(new T.Path(P2(WATER)));
+  PINS_W.forEach(function(p){ bk.holes.push(circ(p[0],p[1],6)); });
+  var bface=new T.Mesh(new T.ShapeGeometry(bk),mc); bface.position.z=PL_T; h.body.add(bface);
+  var pk=new T.Mesh(new T.ExtrudeGeometry(new T.Shape(P2(WATER)),{depth:PK.dep,bevelEnabled:false}),mat(cav,{r:0.5,m:0.4})); pk.position.z=PL_T-PK.dep; h.body.add(pk);
+  var orp=rrect(-73.25,73.25,81.25,289.75,16).map(function(q){return new T.Vector3(q[0],q[1],PL_T-1.2);});
+  var oring=new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(orp,true),260,1.65,8,true),mat(0x1b1f24,{r:0.9,m:0}));
+  h.body.add(oring);
+  h.ch=new T.Group(); h.g.add(h.ch);
+  var wat=new T.Mesh(new T.ExtrudeGeometry(new T.Shape(P2(WATER)),{depth:PK.dep-1.5,bevelEnabled:false}),new T.MeshStandardMaterial({color:0x2f8cff,roughness:0.3,metalness:0.1,transparent:true,opacity:0.6,side:T.DoubleSide}));
+  wat.position.z=PL_T-PK.dep+0.75; h.ch.add(wat);
+
+  // Chốt và bạc định vị
+  h.pins=new T.Group(); h.g.add(h.pins);
+  if(isCai){
+    PINS_W.forEach(function(p){
+      var rs=new T.Shape(); rs.absarc(0,0,9,0,Math.PI*2,false); rs.holes.push(circ(0,0,6));
+      var b=new T.Mesh(new T.ExtrudeGeometry(rs,{depth:20,bevelEnabled:false}),mat(C.bush,{r:0.4,m:0.7})); b.position.set(p[0],p[1],0); h.pins.add(b);
+    });
+  } else {
+    PINS_W.forEach(function(p){
+      var pin=new T.Mesh(new T.CylinderGeometry(6,6,130,20),mat(C.pin,{r:0.25,m:0.85})); pin.rotation.x=Math.PI/2; pin.position.set(p[0],p[1],0); h.pins.add(pin);
+    });
+  }
+  scene.add(h.g);
+  return h;
+}
+mold.cai=build(true); mold.duc=build(false);
+
+/* ---------- Sản phẩm ---------- */
+var prod=new T.Group(); prod.position.y=YB; scene.add(prod);
+var pmat=new T.MeshPhysicalMaterial({color:0xe9f2f8,roughness:0.35,metalness:0,side:T.DoubleSide,transparent:true,opacity:0.7});
+var pbody=new T.Mesh(new T.LatheGeometry([new T.Vector2(0,0)].concat(YSH.map(function(y){return new T.Vector2(rOut(y),y);})),72,0,Math.PI*2),pmat);
+var phand=new T.Mesh(new T.ExtrudeGeometry(new T.Shape(P2(RING)),{depth:HZ,bevelEnabled:false}),pmat); phand.position.z=-HZ/2;
+prod.add(pbody); prod.add(phand);
+
+/* Phôi ống + đầu die (chỉ hiện khi chạy chu kỳ) */
+var parison=new T.Mesh(new T.CylinderGeometry(26,26,1,40,1,true),new T.MeshStandardMaterial({color:0xe0a040,roughness:0.5,side:T.DoubleSide,transparent:true,opacity:0.6}));
+var die=new T.Mesh(new T.CylinderGeometry(46,46,24,40),new T.MeshStandardMaterial({color:0x5d6773,roughness:0.5,metalness:0.5}));
+die.position.y=347; parison.visible=false; die.visible=false; scene.add(parison); scene.add(die);
+var TOP=335;
+var belt=new T.Mesh(new T.BoxGeometry(420,8,240),new T.MeshStandardMaterial({color:0x56616d,roughness:0.8})); belt.position.y=-64; belt.visible=false; scene.add(belt);
+var pin=new T.Mesh(new T.CylinderGeometry(6,6,60,16),new T.MeshStandardMaterial({color:0xd7dde3,roughness:0.3,metalness:0.8})); pin.position.y=400; pin.visible=false; scene.add(pin);
+
+/* ---------- Camera ---------- */
+var VIEWS={iso:[430,300,560],front:[0,170,820],side:[820,170,0],top:[0,900,1]};
+function setView(k){var v=VIEWS[k];camera.position.set(v[0],v[1],v[2]);controls.target.set(0,165,0);controls.update();}
+setView('iso');
+function resize(){
+  var w=wrap.clientWidth,h=wrap.clientHeight; if(!w||!h) return;
+  renderer.setSize(w,h,false); camera.aspect=w/h; camera.updateProjectionMatrix();
+}
+if(window.ResizeObserver){new ResizeObserver(resize).observe(wrap);} window.addEventListener('resize',resize); resize();
+
+function bgColor(){
+  var c=getComputedStyle(document.documentElement).getPropertyValue('--canvas').trim()||'#dde4ea';
+  scene.background=new T.Color(c);
+}
+bgColor();
+try{ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',bgColor); }catch(e){}
+new MutationObserver(bgColor).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+
+/* ---------- Chu kỳ thổi ---------- */
+function ease(x){x=Math.max(0,Math.min(1,x));return x<0.5?2*x*x:1-Math.pow(-2*x+2,2)/2;}
+var HOT=new T.Color(0xffa24a), COOL=new T.Color(0xe9f2f8);
+function cycleState(t){
+  var r={open:1,prodVis:false,k:1,heat:0,fall:0,parH:0,parVis:false,dieVis:true,pin:0,text:''};
+  if(t<0.16){ r.parVis=true; r.parH=ease(t/0.16)*300; r.text='1 · Đầu die đùn phôi ống xuống giữa hai nửa khuôn đang mở.'; }
+  else if(t<0.30){ r.open=1-ease((t-0.16)/0.14); r.parVis=true; r.parH=300; r.text='2 · Khuôn đóng, kẹp phôi ở đáy và quanh cổ. Phần phôi thừa nằm ngoài khuôn.'; }
+  else if(t<0.36){ r.open=0; r.parVis=true; r.parH=300; r.dieVis=false; r.pin=ease((t-0.30)/0.06); r.text='3 · Cắt phôi, blow pin hạ vào cổ chai để định hình miệng và ren.'; }
+  else if(t<0.54){ var u=ease((t-0.36)/0.18); r.open=0; r.dieVis=false; r.pin=1; r.prodVis=u>0.02; r.parVis=u<0.5; r.parH=300; r.k=0.3+0.7*u; r.heat=1; r.text='4 · Thổi khí, phôi bung sát lòng khuôn và vào rãnh quai.'; }
+  else if(t<0.72){ r.open=0; r.dieVis=false; r.pin=1; r.prodVis=true; r.heat=1-ease((t-0.54)/0.18); r.text='5 · Giữ khí và làm nguội qua kênh nước.'; }
+  else if(t<0.80){ r.open=0; r.dieVis=false; r.pin=1-ease((t-0.72)/0.08); r.prodVis=true; r.text='6 · Xả khí, rút blow pin.'; }
+  else if(t<0.90){ r.open=ease((t-0.80)/0.10); r.dieVis=false; r.prodVis=true; r.text='7 · Mở khuôn.'; }
+  else { r.open=1; r.dieVis=false; r.prodVis=true; var f=(t-0.90)/0.10; r.fall=f*f*(YB+60); r.text='8 · Chai rơi xuống băng tải (hoặc tay gắp lấy ra), sau đó cắt bavia ở cổ và đáy.'; }
+  return r;
+}
+
+/* ---------- Áp trạng thái ---------- */
+function apply(){
+  var open=S.open, ex=S.explode, cs=null;
+  if(cycle.on){ cs=cycleState(cycle.t); open=cs.open; ex=0; }
+  var o=open*140+ex*45;
+  mold.cai.g.position.z=o; mold.duc.g.position.z=-o;
+  [mold.cai,mold.duc].forEach(function(h){
+    h.back.position.z=70*ex; h.bolts.position.z=40*ex; h.ins.position.y=-70*ex; h.insb.position.y=-40*ex;
+  });
+  mold.duc.pins.position.z=-50*ex;
+  mold.cai.body.visible=S.vis.cai; mold.duc.body.visible=S.vis.duc;
+  [mold.cai,mold.duc].forEach(function(h){
+    h.back.children.forEach(function(c){ if(c!==h.bolts) c.visible=S.vis.back; });
+    h.bolts.visible=S.vis.bolts&&S.vis.back; h.ins.visible=S.vis.ins; h.insb.visible=S.vis.bolts; h.ch.visible=S.vis.ch; h.pins.visible=S.vis.pins;
+  });
+  var shr=parseFloat($('shr').value)/100;
+  if(cs){
+    prod.visible=S.vis.prod&&cs.prodVis;
+    pbody.scale.set(cs.k,1,cs.k); phand.visible=cs.k>0.95;
+    pmat.color.copy(HOT).lerp(COOL,1-cs.heat); pmat.opacity=0.85;
+    prod.position.y=YB-cs.fall; prod.scale.setScalar(1);
+    parison.visible=cs.parVis; die.visible=cs.dieVis; belt.visible=true; pin.visible=cs.pin>0.01; pin.position.y=330+(1-cs.pin)*70; parison.scale.x=parison.scale.z=S.pard/52;
+    parison.scale.y=Math.max(cs.parH,0.01); parison.position.y=TOP-cs.parH/2;
+    $('phase').textContent=cs.text;
+  } else {
+    prod.visible=S.vis.prod; pbody.scale.set(1,1,1); phand.visible=true;
+    pmat.color.copy(COOL); pmat.opacity=0.7; prod.position.y=YB;
+    prod.scale.setScalar(S.cold?1/(1+shr):1);
+    parison.visible=false; die.visible=false; belt.visible=false; pin.visible=false;
+  }
+  if(S.sec==='x'){clip.normal.set(-1,0,0);clip.constant=S.secPos;renderer.clippingPlanes=[clip];}
+  else if(S.sec==='y'){clip.normal.set(0,-1,0);clip.constant=S.secPos;renderer.clippingPlanes=[clip];}
+  else renderer.clippingPlanes=[];
+}
+var last=performance.now();
+function loop(now){
+  var dt=Math.min((now-last)/1000,0.1); last=now;
+  if(cycle.on){ cycle.t+=dt/16; if(cycle.t>=1) cycle.t-=1; }
+  apply(); controls.update(); renderer.render(scene,camera);
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+/* ---------- Điều khiển ---------- */
+document.querySelectorAll('#views button').forEach(function(b){b.addEventListener('click',function(){setView(b.getAttribute('data-v'));});});
+$('play').addEventListener('click',function(){
+  cycle.on=!cycle.on; cycle.t=0;
+  $('play').textContent=cycle.on?'Dừng chu kỳ':'Chạy chu kỳ thổi';
+  if(!cycle.on) $('phase').textContent='Kéo chuột để xoay, cuộn để phóng to.';
+});
+function setSliders(o,e){
+  $('open').value=o;$('explode').value=e;S.open=o/100;S.explode=e/100;
+  $('o-open').textContent=o+'%';$('o-explode').textContent=e+'%';
+}
+document.querySelectorAll('[data-s]').forEach(function(b){b.addEventListener('click',function(){
+  var k=b.getAttribute('data-s');
+  if(k==='closed') setSliders(0,0); else if(k==='open') setSliders(100,0); else setSliders(100,100);
+});});
+$('open').addEventListener('input',function(){S.open=this.value/100;$('o-open').textContent=this.value+'%';});
+$('explode').addEventListener('input',function(){S.explode=this.value/100;$('o-explode').textContent=this.value+'%';});
+$('sec').addEventListener('change',function(){
+  var v=this.value,sp=$('secpos');S.sec=v;
+  if(v==='none'){sp.disabled=true;return;}
+  sp.disabled=false;
+  if(v==='x'){sp.min=-95;sp.max=95;sp.value=0;} else {sp.min=0;sp.max=330;sp.value=170;}
+  S.secPos=parseFloat(sp.value);$('o-secpos').textContent=sp.value;
+});
+$('secpos').addEventListener('input',function(){S.secPos=parseFloat(this.value);$('o-secpos').textContent=this.value;});
+$('cold').addEventListener('change',function(){S.cold=this.checked;});
+function parNote(){
+  var D=S.pard, bur=2*A/D, hs=69/(D/2), neck=30, msg=[];
+  msg.push('Tỷ lệ thổi thân (Ø117,36 ÷ phôi): '+bur.toFixed(1).replace('.',',')+'. Phôi lớn hơn cổ (Ø'+neck+' theo mô hình) '+(D/neck).toFixed(1).replace('.',',')+' lần. Hệ số kéo phôi ra mép quai: '+hs.toFixed(1).replace('.',',')+'.');
+  if(D<=neck+6) msg.push('Phôi gần bằng hoặc nhỏ hơn cổ: không đủ nhựa để định hình ren.');
+  else if(bur>3||hs>3.2) msg.push('Kéo quá nhiều, thành thân và quai sẽ mỏng. Cần phôi lớn hơn hoặc lệch tâm về phía quai.');
+  else if(bur<1.6) msg.push('Phôi quá lớn so với thân: dễ nhăn, nhiều bavia, tốn nhựa.');
+  else msg.push('Trong khoảng thường dùng cho HDPE (tỷ lệ thổi khoảng 2 đến 3).');
+  $('par-note').textContent=msg.join(' ');
+}
+$('pard').addEventListener('input',function(){S.pard=parseFloat(this.value);$('o-pard').textContent=this.value;parNote();});
+parNote();
+
+var PARTS=[['cai','Tấm cái',C.cai],['duc','Tấm đực',C.duc],['back','Tấm lưng (2)',C.back],['ins','Ghép đáy (2)',C.ins],['pins','Chốt và bạc định vị',C.pin],['bolts','Ốc lục giác M10',C.bolt],['ch','Nước trong mạch làm mát',0x2f8cff],['prod','Sản phẩm',0xe9f2f8]];
+PARTS.forEach(function(p){
+  var l=document.createElement('label');
+  l.innerHTML='<input type="checkbox" checked><span class="sw" style="background:#'+('000000'+p[2].toString(16)).slice(-6)+'"></span><span>'+p[1]+'</span>';
+  l.firstChild.addEventListener('change',function(){S.vis[p[0]]=this.checked;});
+  $('parts').appendChild(l);
+});
+} // end if(renderer)
+
+/* ---------- Tab ---------- */
+document.querySelectorAll('.tabs button').forEach(function(b){b.addEventListener('click',function(){
+  document.querySelectorAll('.tabs button').forEach(function(x){x.setAttribute('aria-selected',x===b?'true':'false');});
+  ['m','v','k'].forEach(function(k){$('pane-'+k).hidden=(k!==b.getAttribute('data-tab'));});
+});});
+
+/* ---------- Bảng thể tích ---------- */
+function f0(x){return Math.round(x).toLocaleString('vi-VN');}
+function f1(x){return x.toLocaleString('vi-VN',{minimumFractionDigits:1,maximumFractionDigits:1});}
+function volTo(yf){
+  var v=0,i;
+  for(i=0;i<YS.length-1&&YS[i+1]<=yf+1e-9;i++){var r0=rOut(YS[i]),r1=rOut(YS[i+1]);v+=Math.PI*(r0*r0+r1*r1)/2*(YS[i+1]-YS[i]);}
+  return v/1000;
+}
+function calc(){
+  var s=parseFloat($('shr').value)/100, m=parseFloat($('mass').value)||0, d=parseFloat($('dens').value)||0.95;
+  var net=parseFloat($('net').value)||2000, vcad=parseFloat($('vcad').value)||0, sh=(parseFloat($('share').value)||0)/100;
+  $('o-shr').textContent=f1(s*100)+'%';
+  var pl=m*sh/d, inner=vcad-pl, dC=vcad-net, dI=inner-net, hot=vcad*Math.pow(1+s,3), model=volTo(SH1);
+  function sg(x){return (x>=0?'+':'−')+f0(Math.abs(x))+' mL ('+(x>=0?'+':'−')+f1(Math.abs(x)/net*100)+'%)';}
+  var rows=[
+    ['Thể tích CAD trong khung đỏ (chai nguội)','<b>'+f0(vcad)+' mL</b>'],
+    ['So với '+f0(net)+' mL (tính theo thể tích CAD)',sg(dC)],
+    ['Nhựa nằm trong khung ('+f0(m*sh)+' g ÷ '+d.toLocaleString('vi-VN')+')','− '+f0(pl)+' mL'],
+    ['Thể tích chứa thực (trừ nhựa)','<b>'+f0(inner)+' mL</b>'],
+    ['So với '+f0(net)+' mL (thể tích chứa thực)',sg(dI)],
+    ['Thể tích lòng khuôn nóng cần (co ngót '+f1(s*100)+'%)',f0(hot)+' mL'],
+    ['Mô hình 3D này (vai tròn xoay, chưa có hốc ngón tay)',f0(model)+' mL ('+(model>=vcad?'+':'−')+f1(Math.abs(model-vcad)/vcad*100)+'% so với CAD)']
+  ];
+  $('vtab').innerHTML=rows.map(function(r,i){return '<tr'+(i===0||i===3?' class="key"':'')+'><td>'+r[0]+'</td><td>'+r[1]+'</td></tr>';}).join('');
+  function tag(x){return x<-0.01*net?['b-bad','Thiếu']:(x<0.02*net?['b-warn','Sát giới hạn']:['b-ok','Đạt']);}
+  var t1=tag(dC),t2=tag(dI),v=$('verdict');
+  v.innerHTML='<div><span class="badge '+t1[0]+'">'+t1[1]+'</span> Theo thể tích CAD trong khung đỏ.</div><div style="margin-top:6px"><span class="badge '+t2[0]+'">'+t2[1]+'</span> Nếu net là thể tích chứa thực, tức đã trừ nhựa.</div>';
+  v.style.background='var(--chip)';
+}
+['shr','mass','dens','net','vcad','share'].forEach(function(id){$(id).addEventListener('input',calc);$(id).addEventListener('change',calc);});
+calc();
+
+/* ---------- Kết quả kiểm tra ---------- */
+var FIND=[
+ ['warn','Trung bình','Mạch nước ngoằn ngoèo theo hình bổ sung','Rãnh khoảng 138×200 mm ở mặt sau mỗi tấm, 6 làn rộng khoảng 25 mm, vách ngăn dày khoảng 10 mm, 5 chỗ quay đầu, bao quanh là rãnh gioăng (mình hiểu hai vòng ngoài là O-ring, bạn xác nhận). Hình không ghi độ sâu rãnh nên mô hình tạm lấy 12 mm. Với tiết diện 25×12 mm và nước 20°C, mỗi nửa khuôn cần khoảng 4 đến 5 L/min để dòng chảy rối (ước tính).'],
+ ['bad','Cao','Mạch nước chưa phủ cổ và vùng kẹp đáy','Rãnh chỉ trải từ khoảng 85 đến 285 mm tính từ đáy khuôn. Vùng cổ (trên 285) và khối ghép đáy (dưới 45,64, chỗ kẹp phôi dày nhất) không có nước. Hai vùng này nóng và dày nhất nên thường cần mạch nước riêng.'],
+ ['warn','Trung bình','Chưa thấy cửa nước vào, ra','Hình không có vị trí cổng nước, ren nối ống và hướng dòng. Cần xác định cách nối hai nửa khuôn và đường qua tấm lưng.'],
+ ['warn','Trung bình','Lớp thép giữa lòng khuôn và nước còn dày','Nước nằm ở mặt sau tấm. Với rãnh sâu 12 mm, từ chỗ lòng khuôn sâu nhất (58,67) tới đáy rãnh còn khoảng 19 mm, ở vùng quai khoảng 68 mm. Thép C-50 dẫn nhiệt kém nên chu kỳ sẽ dài hơn so với kênh khoan sát lòng khuôn hoặc thân nhôm.'],
+ ['bad','Cao','Không có rãnh thoát khí','Không thấy vent ở mặt phân khuôn, vùng đáy và quai. Dễ thiếu hình, rỗ bề mặt, nhất là khi thổi nhanh.'],
+ ['bad','Cao','Chốt định vị sát mép tấm','Tâm lỗ cách mép 14 mm (190 − 162, chia đôi). Bạc Ø18 chỉ còn khoảng 5 mm thành. Dễ nứt khi siết hoặc va đập.'],
+ ['bad','Cao','Danh sách vật tư không khớp bản vẽ','Ghép đáy: danh sách 90×190×56, bản vẽ 45,64 (274,36 + 45,64 = 320 khớp tấm lưng). Part List ghi tấm cái/đực 174,36 trong khi bản vẽ là 274,36. Danh sách vật tư làm tròn 275.'],
+ ['warn','Trung bình','Dung tích net phụ thuộc cách định nghĩa','Theo CAD, thể tích trong khung đỏ là 2.008,6 mL nên đạt 2L (+0,4%). Đó là thể tích khối ngoài của chai. Nếu net là lượng chất lỏng chứa được thì phải trừ nhựa nằm trong khung (khoảng 35 đến 40 mL với giả định 80% của 44 g), còn khoảng 1.97 L, thiếu khoảng 1,5%. Cần thống nhất định nghĩa net với khách hàng.'],
+ ['bad','Cao','Kích thước lòng khuôn trên bản vẽ chưa thấy nhân co ngót','Bản vẽ tấm cái ghi độ sâu lòng 58,67, bằng bán kính chai nguội ở đai gân (117,36 ÷ 2 = 58,68). Chai nguội 2L cần lòng khuôn nóng khoảng 2.163 mL, lớn hơn 2,5% mỗi chiều. Nếu gia công đúng kích thước trên bản vẽ mà không nhân 1,025 thì chai ra nhỏ hơn khoảng 7% thể tích, tức khoảng 1,87 L. Cần xác nhận phần mềm CAM đã nhân co ngót.'],
+ ['warn','Trung bình','Thép C-50 cho thân khuôn','Dẫn nhiệt kém, nặng. Khuôn thổi thường dùng nhôm 6061/7075 cho thân, thép tôi cho cổ và mép kẹp đáy.'],
+ ['warn','Trung bình','Thiếu thông số cổ và vùng kẹp đáy','Không có đường kính trong cổ, bước ren, chiều cao calibrate, dao cắt vùng kẹp đáy. Ô Scale để trống, không có dung sai, không đánh dấu đường phân khuôn.'],
+ ['warn','Trung bình','Quai mỏng','Bề dày quai 7,48 và khe 8,20. Kiểm tra phôi phủ đủ vùng quai và bán kính góc để tránh quai mỏng hoặc nứt.'],
+ ['warn','Trung bình','Khối ghép đáy mang đáy sản phẩm nhưng không có chốt riêng','Khối ghép có hốc đáy sâu khoảng 19,5 mm (ước từ hình chiếu cạnh), đường chia với tấm cái/đực rơi đúng chỗ kết thúc bo đáy. Lệch 0,1 mm là hiện vệt trên thân chai. Bản vẽ chỉ có 2 ốc M10 và một lỗ nhỏ chưa rõ công dụng ở hình chiếu cạnh, không thấy lỗ chốt. Danh sách vật tư chỉ có 4 chốt Ø12×130 cho hai nửa khuôn. Nên thêm 2 chốt định vị mỗi khối. Ký hiệu tái chế và chữ "2 LÍT" khắc ở đáy cũng nằm trong khối này.'],
+ ['warn','Trung bình','Ốc tấm lưng sát mép','10 ốc đọc lại từ bản vẽ 06/06: 6 ốc hai hàng sát mép dài (cách mép khoảng 14 mm, đầu chìm Ø17 chỉ còn khoảng 5,5 mm thành) và 4 ốc ở hai đầu. 3 ốc phía khối ghép đáy bắt vào cả khối ghép. Ốc sát mép dễ nứt thành nếu siết quá.'],
+ ['ok','Thấp','Co ngót 2,5%','Hợp lý cho HDPE thổi (khoảng 1,5 đến 3%). Phụ thuộc mã nhựa, độ dày thành và thời gian làm nguội nên cần xác nhận bằng chai thử.'],
+ ['ok','Thấp','Ốc M10×70 (15) và M6×30 (10)','Bản vẽ không cho thấy vị trí dùng. M10×40 × 20 khớp 10 lỗ × 2 tấm lưng.']
+];
+$('finds').innerHTML=FIND.map(function(f){
+  return '<div class="find"><div class="t"><b>'+f[2]+'</b><span class="badge b-'+f[0]+'">'+f[1]+'</span></div><p>'+f[3]+'</p></div>';
+}).join('');
+})();
+</script>
+
+</body></html>
